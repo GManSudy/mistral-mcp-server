@@ -133,13 +133,19 @@ Boards/lists/cards are resolved by **exact name** (emojis included).
 
 ## Security (mandatory)
 
+- **HTTP mode enforces Bearer auth**: every server started with `--http` /
+  `openproject-mcp-http.py` requires `MCP_BEARER_TOKEN` and rejects requests without
+  a matching `Authorization: Bearer <token>` header (401). Without the token the
+  server refuses to start — set `MCP_ALLOW_UNAUTHENTICATED=true` only for local dev.
+- Put the endpoint behind **TLS** (nginx + Let's Encrypt) when exposing it for
+  Vibe Web; the compose file binds to `127.0.0.1` only — do not publish MCP ports
+  publicly without the reverse proxy.
 - Limit API keys (OpenProject, Trello) to **minimal rights** and rotate them regularly.
-- `.env`, `.mcp-bearer-token` and connector configs are gitignored — **never commit,
-  share or paste them into chats**. Rotate any leaked token immediately.
-- Never expose an MCP endpoint without **TLS + auth** (the servers enforce none by
-  themselves, except the optional Bearer middleware).
+- `.env` and connector configs are gitignored — **never commit, share or paste them
+  into chats**. Rotate any leaked token immediately.
 - Use write tools (`create_*`, `update_*`, `move_card`, `archive_card`, …) only with
   credentials that have the corresponding permissions.
+- Error responses no longer echo raw upstream bodies; request bodies are not logged.
 
 ---
 

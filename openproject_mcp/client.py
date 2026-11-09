@@ -75,8 +75,7 @@ class OpenProjectClient:
         url = f"{self.base_url}/api/v3{endpoint}"
 
         logger.debug(f"API Request: {method} {url}")
-        if data:
-            logger.debug(f"Request body: {json.dumps(data, indent=2)}")
+        # NOTE: never log request bodies — they can contain sensitive content.
 
         # Configure SSL and timeout
         ssl_context = ssl.create_default_context()
@@ -110,7 +109,7 @@ class OpenProjectClient:
                             json.loads(response_text) if response_text else {}
                         )
                     except json.JSONDecodeError:
-                        logger.error(f"Invalid JSON response: {response_text[:200]}...")
+                        logger.error("Invalid JSON response (truncated): %s...", response_text[:200])
                         response_json = {}
 
                     # Handle errors
@@ -128,7 +127,10 @@ class OpenProjectClient:
 
     def _format_error_message(self, status: int, response_text: str) -> str:
         """Format error message based on HTTP status code"""
-        base_msg = f"API Error {status}: {response_text}"
+        # Do not propagate the raw response body to callers - it can contain
+        # sensitive data and would end up in MCP client UIs/logs.
+        logger.debug("API error response (truncated): %s", response_text[:200])
+        base_msg = f"API Error {status}"
 
         error_hints = {
             401: "Authentication failed. Please check your API key.",

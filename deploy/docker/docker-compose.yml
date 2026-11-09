@@ -14,7 +14,7 @@ services:
     environment:
       MCP_ENTRYPOINT: openproject-mcp-http.py
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
 
   trello-mcp:
     image: mistral-mcp-server:latest
@@ -23,4 +23,4 @@ services:
       MCP_ENTRYPOINT: apps/mcp/trello_mcp.py
       MCP_ARGS: "--http --port 8000"
     ports:
-      - "8001:8000"
+      - "127.0.0.1:8001:8000"

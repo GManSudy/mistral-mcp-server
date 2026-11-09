@@ -1,6 +1,6 @@
 name: openproject-mcp
-version: 1.0.0
-description: OpenProject MCP Server for internal use - 40 tools for project management
+version: 1.1.0
+description: OpenProject MCP Server for internal use - FastMCP, API v3
 runtime: python3.10
 
 # Entry point for SSE transport
@@ -16,7 +16,7 @@ env:
 
 # Resources allocation
 resources:
-  memory: 512MB  # Increase if handling many concurrent requests
+  memory: 512MB
   cpu: 0.5
 
 # Health check endpoint
@@ -26,20 +26,13 @@ health_check:
   timeout: 5s
   unhealthy_threshold: 3
 
-# Auto-scaling (if supported by plan)
-scaling:
-  min_instances: 1
-  max_instances: 3
-  target_cpu: 70
-
 # Files to include in deployment
 include:
-  - src/**/*.py
+  - openproject_mcp/**/*.py
   - openproject-mcp-sse.py
   - pyproject.toml
   - README.md
-  - HUONG_DAN_SU_DUNG.md
-  - .env.example
+  - env_example.txt
 
 # Files to exclude from deployment
 exclude:
@@ -47,6 +40,8 @@ exclude:
   - __pycache__/**
   - tests/**
   - docs/**
+  - apps/**
+  - deploy/**
   - *.log
   - .env  # Never commit actual .env file
   - .git/**
@@ -54,14 +49,11 @@ exclude:
   - data/**
   - logs/**
   - certs/**
-  - openproject-mcp.legacy.py
-  - openproject-mcp-http.py
+  - openproject-mcp-http.py  # local HTTP entry point, not for cloud
   - openproject-mcp-fastmcp.py  # stdio version, not needed for cloud
   - test_*.py
-  - *.md  # Exclude other MD files except README and HUONG_DAN
 
 # Dependencies (auto-detected from pyproject.toml)
-# No need to specify if using pyproject.toml
 
 # Timeout settings
 timeout:

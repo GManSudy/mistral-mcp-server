@@ -1,5 +1,6 @@
 """Authentication middleware for HTTP transport."""
 
+import hmac
 import os
 from typing import Dict, Optional
 
@@ -30,7 +31,10 @@ class APIKeyAuth:
         Returns:
             User name if valid, None otherwise
         """
-        return self.valid_keys.get(api_key)
+        for key, name in self.valid_keys.items():
+            if hmac.compare_digest(key, api_key):
+                return name
+        return None
 
 
 def load_api_keys_from_env() -> Dict[str, str]:
