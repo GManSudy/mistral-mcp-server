@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "trello": {
+      "command": "python",
+      "args": ["apps/mcp/trello_mcp.py"],
+      "env": { "TRELLO_API_KEY": "...", "TRELLO_TOKEN": "..." }
+    }
+  }
+}

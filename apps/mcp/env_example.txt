@@ -1,0 +1,3 @@
+# Token erzeugen: trello.com/power-ups/admin -> App -> Link "manually generate a token"
+TRELLO_API_KEY=dein-32-stelliger-hex-key
+TRELLO_TOKEN=dein-32-stelliger-hex-token

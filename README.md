@@ -163,6 +163,49 @@ Project-specific agents, slash commands and hooks live in [`.claude/`](.claude/)
 
 ---
 
+## Trello MCP (self-hosted, FastMCP)
+
+This repo also ships a standalone **Trello MCP server** in `apps/mcp/`, reusing the
+API client from `apps/worker`. Boards/lists/cards are resolved by **exact name**
+(emojis included), same semantics as the write-queue.
+
+**Tools:** `list_boards`, `board_summary(board)`, `create_card(board, list, name, desc?)`,
+`move_card(board, card, list)`, `archive_card(board, card)`
+
+**Setup:**
+
+```bash
+cp apps/mcp/env_example.txt .env   # TRELLO_API_KEY + TRELLO_TOKEN eintragen
+pip install -r apps/mcp/requirements.txt
+python apps/mcp/trello_mcp.py                 # stdio -> Vibe for VSCode / Claude Code
+python apps/mcp/trello_mcp.py --http          # HTTP POST /mcp on :8000 (for Vibe Web)
+```
+
+Token erzeugen: trello.com/power-ups/admin → App → „manually generate a token".
+
+**Docker (for Vibe Web: public HTTPS URL, nginx + Basic Auth in front):**
+
+```bash
+docker build -f deploy/docker/Dockerfile.mcp -t trello-mcp .
+docker run -p 8000:8000 --env-file .env trello-mcp
+```
+
+**VSCode (Vibe) — `.vscode/mcp.json`** (see `apps/mcp/mcp.example.json`):
+
+```json
+{
+  "servers": {
+    "trello": {
+      "command": "python",
+      "args": ["apps/mcp/trello_mcp.py"],
+      "env": { "TRELLO_API_KEY": "...", "TRELLO_TOKEN": "..." }
+    }
+  }
+}
+```
+
+---
+
 ## Security (mandatory)
 
 - Limit the OpenProject API key to **minimal rights** and rotate it regularly.
@@ -202,10 +245,13 @@ openproject-mcp/
 ├── openproject-mcp-fastmcp.py stdio entry point (Vibe VSCode, Claude Code)
 ├── openproject-mcp-http.py    streamable-HTTP entry point (Vibe Web/Studio)
 ├── openproject-mcp-sse.py     SSE entry point
-├── openproject_mcp/           the server package (client, auth, tools, utils)
+├── openproject_mcp/           OpenProject server package (client, auth, tools, utils)
+├── apps/mcp/                  Trello MCP server (trello_mcp.py) + requirements + example config
+├── apps/worker/src/worker/    shared Trello API client (trello_client.py)
+├── deploy/docker/             Dockerfile.mcp for the Trello server
 ├── scripts/                   install helper (install_mcp.ps1)
-├── tests/                     tool tests (test_*.py)
-├── docs/                      guides: Claude Code setup/guide, weekly reports, etc.
+├── tests/                     OpenProject tool tests (test_*.py)
+├── docs/                      guides: Claude Code setup/guide, news tools
 └── .claude/                   Claude Code project config (agents, commands, hooks)
 ```
 
