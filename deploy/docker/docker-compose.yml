@@ -1,0 +1,26 @@
+# Deploys all MCP servers of this repo with one command:
+#   cp env_example.txt .env   # fill in keys
+#   docker compose -f deploy/docker/docker-compose.yml up --build
+#
+# OpenProject MCP:  http://localhost:8000/mcp
+# Trello MCP:       http://localhost:8001/mcp
+services:
+  openproject-mcp:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    image: mistral-mcp-server:latest
+    env_file: ../../.env
+    environment:
+      MCP_ENTRYPOINT: openproject-mcp-http.py
+    ports:
+      - "8000:8000"
+
+  trello-mcp:
+    image: mistral-mcp-server:latest
+    env_file: ../../.env
+    environment:
+      MCP_ENTRYPOINT: apps/mcp/trello_mcp.py
+      MCP_ARGS: "--http --port 8000"
+    ports:
+      - "8001:8000"

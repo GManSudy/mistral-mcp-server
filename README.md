@@ -1,12 +1,14 @@
-# Mistral MCP Servers — OpenProject & Trello
+# MCP Servers for Mistral Vibe
 
-A collection of **self-hosted MCP servers** (Python / FastMCP) optimized for
-**Mistral** agents (Studio / Vibe Web & Vibe for VSCode). More servers are added
-over time — currently:
+**Self-hosted MCP servers** (Python / FastMCP) for **Mistral Studio / Vibe Web** and
+**Vibe for VSCode**. One repo, one config, one Docker image — every MCP server here
+deploys the same way, and new ones can be added without changing the setup.
 
-| Server | Package / entry point | Purpose |
+Currently included:
+
+| Server | Entry point | Purpose |
 |---|---|---|
-| **OpenProject** | `openproject_mcp/`, `openproject-mcp-*.py` | OpenProject API v3: projects, work packages, news, time entries, weekly reports |
+| **OpenProject** | `openproject-mcp-*.py` | OpenProject API v3: projects, work packages, news, time entries, weekly reports |
 | **Trello** | `apps/mcp/trello_mcp.py` | Boards/lists/cards by exact name: list, summarize, create, move, archive |
 
 The OpenProject server is an optimized fork of
@@ -14,103 +16,28 @@ https://github.com/AndyEverything/openproject-mcp-server — see [Credits](#cred
 
 Detailed German guide for OpenProject + Mistral: [`AGENT.md`](AGENT.md).
 
-## What's optimized in this fork
-
-- **Fixed `Dockerfile`** — upstream `CMD` pointed to a non-existent `openproject-mcp.py`;
-  now starts `openproject-mcp-fastmcp.py` and exposes port 8000
-- **Complete `requirements.txt`** — upstream missed `fastmcp`, `pydantic`, `uvicorn`,
-  `starlette` (only installable via `pyproject.toml`)
-- **Removed the 138 KB legacy monolith** (`openproject-mcp.legacy.py`) — dead code
-- **Cleaner structure** — package renamed `src` → `openproject_mcp`, tests in `tests/`,
-  guides in `docs/`
-- **Packaging metadata** — real author, repo URLs (`Repository` / `Upstream`), version bump
-- **Step-by-step Mistral Vibe setup** (below)
-
 ---
 
-## OpenProject MCP — step-by-step setup
-
-### Prerequisites
-
-- An **OpenProject instance** (cloud or self-hosted) and an **API key**
-- **Python 3.10+** and [uv](https://docs.astral.sh/uv/) (or plain pip)
-- A **Mistral account** (Studio / Vibe)
-- For Mistral Vibe **Web** (cloud): a server with a **public HTTPS URL** (e.g. a VM with
-  nginx + Let's Encrypt) — see Step 4
-
-### Step 1 — Clone and set up this repository
+## Quickstart (all servers, unified)
 
 ```bash
 git clone https://github.com/GManSudy/mistral-mcp-server.git
 cd mistral-mcp-server
-uv sync          # or: pip install -r requirements.txt
+cp env_example.txt .env        # fill in OPENPROJECT_* and/or TRELLO_*
+uv sync                        # or: pip install -r requirements.txt
 ```
 
-### Step 2 — Configure the OpenProject server
+`env_example.txt` / `.env` is shared by all servers — each server reads only its own
+variables, so you can configure one or many.
+
+### Run a server locally (stdio — for Vibe VSCode)
 
 ```bash
-cp env_example.txt .env
+uv run openproject-mcp-fastmcp.py     # OpenProject, stdio
+python apps/mcp/trello_mcp.py         # Trello, stdio
 ```
 
-Edit `.env`:
-
-```env
-OPENPROJECT_URL=https://your-instance.openproject.com
-OPENPROJECT_API_KEY=your-api-key-here
-```
-
-**Get the API key in OpenProject:** Avatar → *My account* → *Access tokens* → *+ Add*.
-The server authenticates with `Authorization: Basic base64("apikey:" + KEY)` —
-`Authorization: ApiKey <token>` is **rejected** by OpenProject.
-
-### Step 3 — Start the OpenProject server (pick one transport)
-
-**stdio** (local: Vibe for VSCode):
-
-```bash
-uv run openproject-mcp-fastmcp.py
-```
-
-**streamable HTTP** (Mistral Studio / Vibe Web, remote agents):
-
-```bash
-uv run openproject-mcp-http.py     # default 0.0.0.0:8000, endpoint POST /mcp
-```
-
-**Docker:**
-
-```bash
-docker build -t openproject-mcp .
-docker run --env-file .env -p 8000:8000 openproject-mcp
-```
-
-Local smoke test (HTTP mode): set `MCP_HTTP_HOST=127.0.0.1`, then send an MCP
-`initialize` request to `http://127.0.0.1:8000/mcp` → expect HTTP 200 with a session ID.
-
-### Step 4 — Connect Mistral Vibe Web (Studio) via Custom MCP Connector
-
-Studio/Vibe Web run in the cloud, so the MCP endpoint needs a **publicly reachable
-HTTPS URL with auth in front**:
-
-1. Run the HTTP server on a VM (e.g. OpenStack), put **nginx** in front
-   (Let's Encrypt + Basic Auth/Bearer), proxy to `http://127.0.0.1:8000/mcp` with
-   `proxy_buffering off`.
-   Security group: only **22** (your admin IP) and **443** public — **never expose
-   port 8000**.
-2. In Vibe Web: **Connectors → "Custom MCP server"**
-   - Transport: **streamable HTTP**
-   - URL: `https://<your-host>/mcp`
-   - Auth: **Bearer** + token (from `.mcp-bearer-token` / your proxy credentials)
-3. Verify: the connector appears in `list_my_connectors`, its tools in
-   `list_connector_tools`.
-
-> For quick tests only: a temporary tunnel from your local PC works too — then the
-> server **must** have Bearer auth enabled (middleware `MCP_BEARER_TOKEN` in
-> `openproject-mcp-http.py`). Tunnel URLs are public and change on every restart.
-
-### Step 5 — Connect Mistral Vibe for VSCode (local, stdio)
-
-Add to your MCP config:
+Vibe VSCode `mcpServers` config (example OpenProject):
 
 ```json
 {
@@ -127,9 +54,64 @@ Add to your MCP config:
 }
 ```
 
-All tools (`list_projects`, `list_work_packages`, …) are now available in the Vibe chat.
+### Run a server as HTTP (for Vibe Web / Studio — needs public HTTPS, see below)
 
-### Step 6 — Verify the integration (in this order)
+```bash
+uv run openproject-mcp-http.py                 # POST /mcp on :8000
+python apps/mcp/trello_mcp.py --http --port 8001
+```
+
+### Deploy everything with Docker (one command)
+
+```bash
+cp env_example.txt .env
+docker compose -f deploy/docker/docker-compose.yml up --build
+# OpenProject MCP: http://localhost:8000/mcp
+# Trello MCP:      http://localhost:8001/mcp
+```
+
+The single `Dockerfile` builds one image for **all** servers; select the server via
+environment variables:
+
+```bash
+docker build -t mcp-servers .
+docker run -p 8000:8000 --env-file .env mcp-servers                                  # OpenProject HTTP (default)
+docker run -p 8001:8000 --env-file .env -e MCP_ENTRYPOINT=apps/mcp/trello_mcp.py \
+  -e MCP_ARGS="--http --port 8000" mcp-servers                                       # Trello HTTP
+```
+
+---
+
+## Mistral Vibe Web (Studio) — expose an MCP endpoint publicly
+
+Studio/Vibe Web run in the cloud, so the MCP endpoint needs a **publicly reachable
+HTTPS URL with auth in front**:
+
+1. Run the server on a VM (e.g. OpenStack), put **nginx** in front
+   (Let's Encrypt + Basic Auth/Bearer), proxy to `http://127.0.0.1:8000/mcp` with
+   `proxy_buffering off`. Security group: only **22** (your admin IP) and **443**
+   public — **never expose port 8000**.
+2. In Vibe Web: **Connectors → "Custom MCP server"**
+   - Transport: **streamable HTTP**
+   - URL: `https://<your-host>/mcp`
+   - Auth: **Bearer** + token (from `.mcp-bearer-token` / your proxy credentials)
+3. Verify: the connector appears in `list_my_connectors`, its tools in
+   `list_connector_tools`.
+
+> For quick tests only: a temporary tunnel from your local PC works too — then the
+> server **must** have Bearer auth enabled (middleware `MCP_BEARER_TOKEN` in
+> `openproject-mcp-http.py`). Tunnel URLs are public and change on every restart.
+
+---
+
+## Server: OpenProject
+
+**Setup:** `cp env_example.txt .env` and fill in `OPENPROJECT_URL` + `OPENPROJECT_API_KEY`
+(OpenProject: Avatar → *My account* → *Access tokens* → *+ Add*). The server
+authenticates with `Authorization: Basic base64("apikey:" + KEY)` —
+`Authorization: ApiKey <token>` is **rejected** by OpenProject.
+
+**Verify (in this order):**
 
 1. `test_connection` → *API connection successful* + instance version
 2. `check_permissions` → your user info
@@ -137,48 +119,18 @@ All tools (`list_projects`, `list_work_packages`, …) are now available in the 
 4. `list_work_packages(project_id=<id>, page_size=100)`
 5. Epics/stories: `list_work_package_children(parent_id=<epic-id>, include_descendants=true)`
 
----
+Local smoke test (HTTP mode): set `MCP_HTTP_HOST=127.0.0.1`, then send an MCP
+`initialize` request to `http://127.0.0.1:8000/mcp` → expect HTTP 200 with a session ID.
 
-## Trello MCP (self-hosted, FastMCP)
+## Server: Trello
 
-Standalone **Trello MCP server** in `apps/mcp/`, reusing the API client from
-`apps/worker`. Boards/lists/cards are resolved by **exact name** (emojis included),
-same semantics as the write-queue.
+**Setup:** fill in `TRELLO_API_KEY` + `TRELLO_TOKEN` in `.env`
+(token: trello.com/power-ups/admin → App → „manually generate a token").
 
 **Tools:** `list_boards`, `board_summary(board)`, `create_card(board, list, name, desc?)`,
 `move_card(board, card, list)`, `archive_card(board, card)`
 
-**Setup:**
-
-```bash
-cp apps/mcp/env_example.txt .env   # TRELLO_API_KEY + TRELLO_TOKEN eintragen
-pip install -r apps/mcp/requirements.txt
-python apps/mcp/trello_mcp.py                 # stdio -> Vibe for VSCode
-python apps/mcp/trello_mcp.py --http          # HTTP POST /mcp on :8000 (for Vibe Web)
-```
-
-Token erzeugen: trello.com/power-ups/admin → App → „manually generate a token".
-
-**Docker (for Vibe Web: public HTTPS URL, nginx + Basic Auth in front):**
-
-```bash
-docker build -f deploy/docker/Dockerfile.mcp -t trello-mcp .
-docker run -p 8000:8000 --env-file .env trello-mcp
-```
-
-**VSCode (Vibe) — `.vscode/mcp.json`** (see `apps/mcp/mcp.example.json`):
-
-```json
-{
-  "servers": {
-    "trello": {
-      "command": "python",
-      "args": ["apps/mcp/trello_mcp.py"],
-      "env": { "TRELLO_API_KEY": "...", "TRELLO_TOKEN": "..." }
-    }
-  }
-}
-```
+Boards/lists/cards are resolved by **exact name** (emojis included).
 
 ---
 
@@ -200,7 +152,7 @@ docker run -p 8000:8000 --env-file .env trello-mcp
 |---|---|---|
 | Connector error in Vibe Web | `127.0.0.1` instead of public URL | Enter the tunnel/VM URL including path `/mcp` |
 | 401 | Bearer token wrong/rotated | Copy token exactly from `.mcp-bearer-token`, restart server |
-| 403 on write access | API key lacks project rights | Check rights in OpenProject/Trello, run `check_permissions` |
+| 403 on write access | API key lacks rights | Check rights in OpenProject/Trello, run `check_permissions` |
 | Tunnel URL dead | Tunnel restarted | Take the new URL from the log, update the connector |
 | MCP server not showing in Vibe VSCode | invalid JSON / wrong paths | Validate config, use absolute paths, restart completely |
 | `list_time_entry_activities` → 404 | endpoint not available on all instances | Use hard-coded activity IDs 1–4 (Management/Specification/Development/Testing) |
@@ -215,20 +167,31 @@ mistral-mcp-server/
 ├── README.md                  this guide
 ├── AGENT.md                   detailed OpenProject + Mistral (Studio/Vibe) guide (German)
 ├── pyproject.toml             packaging metadata for the OpenProject server
-├── requirements.txt           complete dependency list (OpenProject server)
+├── requirements.txt           unified dependency list (ALL servers)
 ├── uv.lock                    lockfile
-├── Dockerfile                 OpenProject server container (CMD + EXPOSE 8000)
-├── env_example.txt            OpenProject .env template
+├── env_example.txt            unified .env template (OpenProject + Trello + shared)
+├── Dockerfile                 unified image for ALL servers (MCP_ENTRYPOINT/MCP_ARGS)
+├── deploy/docker/
+│   └── docker-compose.yml     deploys all servers at once
 ├── openproject-mcp-fastmcp.py OpenProject stdio entry point
 ├── openproject-mcp-http.py    OpenProject streamable-HTTP entry point
 ├── openproject-mcp-sse.py     OpenProject SSE entry point
 ├── openproject_mcp/           OpenProject server package (client, auth, tools, utils)
-├── apps/mcp/                  Trello MCP server (trello_mcp.py) + requirements + example config
+├── apps/mcp/
+│   ├── trello_mcp.py          Trello MCP server (stdio + --http)
+│   └── mcp.example.json       Vibe VSCode config example
 ├── apps/worker/src/worker/    shared Trello API client (trello_client.py)
-├── deploy/docker/             Dockerfile.mcp for the Trello server
 ├── tests/                     OpenProject tool tests (test_*.py)
 └── docs/                      guides (e.g. news tools)
 ```
+
+## Adding another MCP server
+
+1. Put the entry point in the repo (e.g. `apps/<name>/`) and reuse `requirements.txt`.
+2. Read its credentials from `.env` (add a section to `env_example.txt`).
+3. No Docker changes needed: run it with
+   `MCP_ENTRYPOINT=apps/<name>/<server>.py` (+ `MCP_ARGS`), or add a service to
+   `deploy/docker/docker-compose.yml`.
 
 ## Credits
 

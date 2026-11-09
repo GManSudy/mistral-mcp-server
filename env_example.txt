@@ -1,5 +1,10 @@
-# OpenProject Configuration
-# Copy this file to .env and fill in your values
+# Unified configuration for all MCP servers in this repo.
+# Copy this file to .env and fill in the values for the servers you use.
+# Every server reads only its own variables; unused sections can stay empty.
+
+# ---------------------------------------------------------------
+# OpenProject MCP server (openproject-mcp-*.py)
+# ---------------------------------------------------------------
 
 # Required: Your OpenProject instance URL
 OPENPROJECT_URL=https://your-instance.openproject.com
@@ -17,3 +22,15 @@ LOG_LEVEL=INFO
 
 # Optional: Test connection on startup (true/false)
 TEST_CONNECTION_ON_STARTUP=true
+
+# Optional: HTTP transport host/port for openproject-mcp-http.py
+MCP_HTTP_HOST=0.0.0.0
+MCP_HTTP_PORT=8000
+
+# ---------------------------------------------------------------
+# Trello MCP server (apps/mcp/trello_mcp.py)
+# ---------------------------------------------------------------
+
+# Token erzeugen: trello.com/power-ups/admin -> App -> "manually generate a token"
+TRELLO_API_KEY=your-32-char-hex-key
+TRELLO_TOKEN=your-32-char-hex-token
