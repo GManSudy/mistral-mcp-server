@@ -1,14 +1,19 @@
-# OpenProject MCP — Mistral & Claude Edition
+# Mistral MCP Servers — OpenProject & Trello Edition
 
-An **optimized fork of the OpenProject MCP server** (Python / FastMCP, OpenProject API v3),
-specialized for **Mistral** (Studio / Vibe Web & Vibe for VSCode) and **Claude**
-(Claude Code / Claude Desktop) agents.
+A collection of **self-hosted MCP servers** (Python / FastMCP) optimized for
+**Mistral** (Studio / Vibe Web & Vibe for VSCode) and **Claude** (Claude Code /
+Claude Desktop) agents. More servers are added over time — currently:
 
-Original project: https://github.com/AndyEverything/openproject-mcp-server — see
-[Credits](#credits).
+| Server | Package / entry point | Purpose |
+|---|---|---|
+| **OpenProject** | `openproject_mcp/`, `openproject-mcp-*.py` | OpenProject API v3: projects, work packages, news, time entries, weekly reports |
+| **Trello** | `apps/mcp/trello_mcp.py` | Boards/lists/cards by exact name: list, summarize, create, move, archive |
 
-Detailed German guide: [`AGENT.md`](AGENT.md). Claude-specific docs:
-[`docs/CLAUDE_CODE_SETUP.md`](docs/CLAUDE_CODE_SETUP.md) and
+The OpenProject server is an optimized fork of
+https://github.com/AndyEverything/openproject-mcp-server — see [Credits](#credits).
+
+Detailed German guide for OpenProject + Mistral: [`AGENT.md`](AGENT.md). Claude-specific
+docs: [`docs/CLAUDE_CODE_SETUP.md`](docs/CLAUDE_CODE_SETUP.md) and
 [`docs/CLAUDE_CODE_GUIDE.md`](docs/CLAUDE_CODE_GUIDE.md).
 
 ## What's optimized in this fork
@@ -25,7 +30,9 @@ Detailed German guide: [`AGENT.md`](AGENT.md). Claude-specific docs:
 
 ---
 
-## Prerequisites
+## OpenProject MCP — step-by-step setup
+
+### Prerequisites
 
 - An **OpenProject instance** (cloud or self-hosted) and an **API key**
 - **Python 3.10+** and [uv](https://docs.astral.sh/uv/) (or plain pip)
@@ -33,19 +40,15 @@ Detailed German guide: [`AGENT.md`](AGENT.md). Claude-specific docs:
 - For Mistral Vibe **Web** (cloud): a server with a **public HTTPS URL** (e.g. a VM with
   nginx + Let's Encrypt) — see Step 4
 
----
-
-## Step-by-Step Setup
-
 ### Step 1 — Clone and set up this repository
 
 ```bash
 git clone https://github.com/GManSudy/mistral-mcp-server.git
-cd openproject-mcp
+cd mistral-mcp-server
 uv sync          # or: pip install -r requirements.txt
 ```
 
-### Step 2 — Configure the server
+### Step 2 — Configure the OpenProject server
 
 ```bash
 cp env_example.txt .env
@@ -62,7 +65,7 @@ OPENPROJECT_API_KEY=your-api-key-here
 The server authenticates with `Authorization: Basic base64("apikey:" + KEY)` —
 `Authorization: ApiKey <token>` is **rejected** by OpenProject.
 
-### Step 3 — Start the server (pick one transport)
+### Step 3 — Start the OpenProject server (pick one transport)
 
 **stdio** (local agents: Vibe for VSCode, Claude Code/Desktop):
 
@@ -139,7 +142,7 @@ Back up and edit the Claude config
   "mcpServers": {
     "openproject": {
       "command": "uv",
-      "args": ["--directory", "/path/to/openproject-mcp", "run", "openproject-mcp-fastmcp.py"],
+      "args": ["--directory", "/path/to/mistral-mcp-server", "run", "openproject-mcp-fastmcp.py"],
       "env": {
         "OPENPROJECT_URL": "https://<your-openproject-instance>",
         "OPENPROJECT_API_KEY": "<token-from-access-tokens>"
@@ -165,9 +168,9 @@ Project-specific agents, slash commands and hooks live in [`.claude/`](.claude/)
 
 ## Trello MCP (self-hosted, FastMCP)
 
-This repo also ships a standalone **Trello MCP server** in `apps/mcp/`, reusing the
-API client from `apps/worker`. Boards/lists/cards are resolved by **exact name**
-(emojis included), same semantics as the write-queue.
+Standalone **Trello MCP server** in `apps/mcp/`, reusing the API client from
+`apps/worker`. Boards/lists/cards are resolved by **exact name** (emojis included),
+same semantics as the write-queue.
 
 **Tools:** `list_boards`, `board_summary(board)`, `create_card(board, list, name, desc?)`,
 `move_card(board, card, list)`, `archive_card(board, card)`
@@ -208,13 +211,13 @@ docker run -p 8000:8000 --env-file .env trello-mcp
 
 ## Security (mandatory)
 
-- Limit the OpenProject API key to **minimal rights** and rotate it regularly.
+- Limit API keys (OpenProject, Trello) to **minimal rights** and rotate them regularly.
 - `.env`, `.mcp-bearer-token` and connector configs are gitignored — **never commit,
   share or paste them into chats**. Rotate any leaked token immediately.
-- Never expose the MCP endpoint without **TLS + auth** (the server enforces none by
-  itself, except the optional Bearer middleware).
-- Use write tools (`create_*`, `update_work_package`, `delete_work_package`) only with
-  an API key that has the corresponding project permissions.
+- Never expose an MCP endpoint without **TLS + auth** (the servers enforce none by
+  themselves, except the optional Bearer middleware).
+- Use write tools (`create_*`, `update_*`, `move_card`, `archive_card`, …) only with
+  credentials that have the corresponding permissions.
 
 ---
 
@@ -224,27 +227,28 @@ docker run -p 8000:8000 --env-file .env trello-mcp
 |---|---|---|
 | Connector error in Vibe Web | `127.0.0.1` instead of public URL | Enter the tunnel/VM URL including path `/mcp` |
 | 401 | Bearer token wrong/rotated | Copy token exactly from `.mcp-bearer-token`, restart server |
-| 403 on write access | API key lacks project rights | Check rights in OpenProject, run `check_permissions` |
+| 403 on write access | API key lacks project rights | Check rights in OpenProject/Trello, run `check_permissions` |
 | Tunnel URL dead | Tunnel restarted | Take the new URL from the log, update the connector |
 | MCP server not showing in Claude | invalid JSON / wrong paths | Validate config, use absolute paths, restart completely |
 | `list_time_entry_activities` → 404 | endpoint not available on all instances | Use hard-coded activity IDs 1–4 (Management/Specification/Development/Testing) |
+| Trello: board/list/card not found | name mismatch (incl. emojis) | Use the exact name, check with `list_boards` / `board_summary` |
 
 ---
 
 ## Repository layout
 
 ```
-openproject-mcp/
-├── README.md                  this step-by-step guide
-├── AGENT.md                   detailed Mistral (Studio/Vibe) guide (German)
-├── pyproject.toml             packaging metadata (author, deps, URLs)
-├── requirements.txt           complete dependency list
+mistral-mcp-server/
+├── README.md                  this guide
+├── AGENT.md                   detailed OpenProject + Mistral (Studio/Vibe) guide (German)
+├── pyproject.toml             packaging metadata for the OpenProject server
+├── requirements.txt           complete dependency list (OpenProject server)
 ├── uv.lock                    lockfile
-├── Dockerfile                 fixed container build (CMD + EXPOSE 8000)
-├── env_example.txt            .env template
-├── openproject-mcp-fastmcp.py stdio entry point (Vibe VSCode, Claude Code)
-├── openproject-mcp-http.py    streamable-HTTP entry point (Vibe Web/Studio)
-├── openproject-mcp-sse.py     SSE entry point
+├── Dockerfile                 OpenProject server container (CMD + EXPOSE 8000)
+├── env_example.txt            OpenProject .env template
+├── openproject-mcp-fastmcp.py OpenProject stdio entry point
+├── openproject-mcp-http.py    OpenProject streamable-HTTP entry point
+├── openproject-mcp-sse.py     OpenProject SSE entry point
 ├── openproject_mcp/           OpenProject server package (client, auth, tools, utils)
 ├── apps/mcp/                  Trello MCP server (trello_mcp.py) + requirements + example config
 ├── apps/worker/src/worker/    shared Trello API client (trello_client.py)
@@ -257,8 +261,10 @@ openproject-mcp/
 
 ## Credits
 
-This project is an optimized fork of the original **openproject-mcp-server** by
-[**AndyEverything**](https://github.com/AndyEverything) — thank you for the original work
-and inspiration! The original project is community-driven (`contributions-welcome`, MIT)
-and remains available at https://github.com/AndyEverything/openproject-mcp-server.
-All changes in this fork are MIT-licensed as well.
+The **OpenProject MCP server** in this repo is an optimized fork of the original
+**openproject-mcp-server** by [**AndyEverything**](https://github.com/AndyEverything) —
+thank you for the original work and inspiration! The original project is
+community-driven (`contributions-welcome`, MIT) and remains available at
+https://github.com/AndyEverything/openproject-mcp-server.
+The **Trello MCP server** (`apps/`) is original work for this repo.
+Everything here is MIT-licensed.
