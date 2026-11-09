@@ -5,7 +5,7 @@ FastMCP, Python) mit Mistral Studio / Mistral Vibe (Web & VSCode) verbunden wird
 
 ## Schnellstart: Integration mit Mistral Vibe (Web & VSCode)
 
-Analog zur Claude-Integration im README — zwei Wege:
+Zwei Wege:
 
 ### Vibe Web (Studio): Custom-MCP-Connector
 1. Server mit erreichbarer HTTPS-URL bereitstellen (siehe „Variante B", Schritt 2)
@@ -54,7 +54,7 @@ uv sync                      # oder: pip install .
   (`openproject_mcp/client.py`). `Authorization: ApiKey <token>` wird von OpenProject **abgelehnt**.
 - HTTP-Modus (für Studio/Vibe Web): `uv run openproject-mcp-http.py`
   (Default `0.0.0.0:8000`, Endpunkt `POST /mcp`, streamable HTTP)
-- stdio-Modus (für lokale MCP-Clients wie Vibe VSCode / Claude Desktop):
+- stdio-Modus (für lokale MCP-Clients wie Vibe VSCode):
   `uv run openproject-mcp-fastmcp.py`
 - Lokaler Smoke-Test: `MCP_HTTP_HOST=127.0.0.1` setzen, dann MCP-`initialize`
   gegen `http://127.0.0.1:8000/mcp` → erwartet HTTP 200 mit Session-ID.

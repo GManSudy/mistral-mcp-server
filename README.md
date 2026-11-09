@@ -1,8 +1,8 @@
-# Mistral MCP Servers — OpenProject & Trello Edition
+# Mistral MCP Servers — OpenProject & Trello
 
 A collection of **self-hosted MCP servers** (Python / FastMCP) optimized for
-**Mistral** (Studio / Vibe Web & Vibe for VSCode) and **Claude** (Claude Code /
-Claude Desktop) agents. More servers are added over time — currently:
+**Mistral** agents (Studio / Vibe Web & Vibe for VSCode). More servers are added
+over time — currently:
 
 | Server | Package / entry point | Purpose |
 |---|---|---|
@@ -12,9 +12,7 @@ Claude Desktop) agents. More servers are added over time — currently:
 The OpenProject server is an optimized fork of
 https://github.com/AndyEverything/openproject-mcp-server — see [Credits](#credits).
 
-Detailed German guide for OpenProject + Mistral: [`AGENT.md`](AGENT.md). Claude-specific
-docs: [`docs/CLAUDE_CODE_SETUP.md`](docs/CLAUDE_CODE_SETUP.md) and
-[`docs/CLAUDE_CODE_GUIDE.md`](docs/CLAUDE_CODE_GUIDE.md).
+Detailed German guide for OpenProject + Mistral: [`AGENT.md`](AGENT.md).
 
 ## What's optimized in this fork
 
@@ -26,7 +24,7 @@ docs: [`docs/CLAUDE_CODE_SETUP.md`](docs/CLAUDE_CODE_SETUP.md) and
 - **Cleaner structure** — package renamed `src` → `openproject_mcp`, tests in `tests/`,
   guides in `docs/`
 - **Packaging metadata** — real author, repo URLs (`Repository` / `Upstream`), version bump
-- **Step-by-step agent setup** (below) for Mistral Vibe and Claude Code
+- **Step-by-step Mistral Vibe setup** (below)
 
 ---
 
@@ -36,7 +34,7 @@ docs: [`docs/CLAUDE_CODE_SETUP.md`](docs/CLAUDE_CODE_SETUP.md) and
 
 - An **OpenProject instance** (cloud or self-hosted) and an **API key**
 - **Python 3.10+** and [uv](https://docs.astral.sh/uv/) (or plain pip)
-- A **Mistral account** (Studio / Vibe) *or* **Claude Code / Claude Desktop** installed
+- A **Mistral account** (Studio / Vibe)
 - For Mistral Vibe **Web** (cloud): a server with a **public HTTPS URL** (e.g. a VM with
   nginx + Let's Encrypt) — see Step 4
 
@@ -67,7 +65,7 @@ The server authenticates with `Authorization: Basic base64("apikey:" + KEY)` —
 
 ### Step 3 — Start the OpenProject server (pick one transport)
 
-**stdio** (local agents: Vibe for VSCode, Claude Code/Desktop):
+**stdio** (local: Vibe for VSCode):
 
 ```bash
 uv run openproject-mcp-fastmcp.py
@@ -131,32 +129,7 @@ Add to your MCP config:
 
 All tools (`list_projects`, `list_work_packages`, …) are now available in the Vibe chat.
 
-### Step 6 — Connect Claude Code / Claude Desktop (local, stdio)
-
-Back up and edit the Claude config
-(`%APPDATA%\Claude\claude_desktop_config.json` on Windows,
-`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
-
-```json
-{
-  "mcpServers": {
-    "openproject": {
-      "command": "uv",
-      "args": ["--directory", "/path/to/mistral-mcp-server", "run", "openproject-mcp-fastmcp.py"],
-      "env": {
-        "OPENPROJECT_URL": "https://<your-openproject-instance>",
-        "OPENPROJECT_API_KEY": "<token-from-access-tokens>"
-      }
-    }
-  }
-}
-```
-
-Then **fully restart** Claude Code/Desktop and check the MCP icon in the status bar.
-Project-specific agents, slash commands and hooks live in [`.claude/`](.claude/) — see
-[`docs/CLAUDE_CODE_GUIDE.md`](docs/CLAUDE_CODE_GUIDE.md).
-
-### Step 7 — Verify the integration (in this order)
+### Step 6 — Verify the integration (in this order)
 
 1. `test_connection` → *API connection successful* + instance version
 2. `check_permissions` → your user info
@@ -180,7 +153,7 @@ same semantics as the write-queue.
 ```bash
 cp apps/mcp/env_example.txt .env   # TRELLO_API_KEY + TRELLO_TOKEN eintragen
 pip install -r apps/mcp/requirements.txt
-python apps/mcp/trello_mcp.py                 # stdio -> Vibe for VSCode / Claude Code
+python apps/mcp/trello_mcp.py                 # stdio -> Vibe for VSCode
 python apps/mcp/trello_mcp.py --http          # HTTP POST /mcp on :8000 (for Vibe Web)
 ```
 
@@ -229,7 +202,7 @@ docker run -p 8000:8000 --env-file .env trello-mcp
 | 401 | Bearer token wrong/rotated | Copy token exactly from `.mcp-bearer-token`, restart server |
 | 403 on write access | API key lacks project rights | Check rights in OpenProject/Trello, run `check_permissions` |
 | Tunnel URL dead | Tunnel restarted | Take the new URL from the log, update the connector |
-| MCP server not showing in Claude | invalid JSON / wrong paths | Validate config, use absolute paths, restart completely |
+| MCP server not showing in Vibe VSCode | invalid JSON / wrong paths | Validate config, use absolute paths, restart completely |
 | `list_time_entry_activities` → 404 | endpoint not available on all instances | Use hard-coded activity IDs 1–4 (Management/Specification/Development/Testing) |
 | Trello: board/list/card not found | name mismatch (incl. emojis) | Use the exact name, check with `list_boards` / `board_summary` |
 
@@ -253,10 +226,8 @@ mistral-mcp-server/
 ├── apps/mcp/                  Trello MCP server (trello_mcp.py) + requirements + example config
 ├── apps/worker/src/worker/    shared Trello API client (trello_client.py)
 ├── deploy/docker/             Dockerfile.mcp for the Trello server
-├── scripts/                   install helper (install_mcp.ps1)
 ├── tests/                     OpenProject tool tests (test_*.py)
-├── docs/                      guides: Claude Code setup/guide, news tools
-└── .claude/                   Claude Code project config (agents, commands, hooks)
+└── docs/                      guides (e.g. news tools)
 ```
 
 ## Credits

@@ -2,7 +2,7 @@
 """
 OpenProject MCP Server - HTTP Transport Entry Point
 
-This is the entry point for HTTP transport (claude.com + 12 users).
+This is the entry point for HTTP transport (remote agents, e.g. Vibe Web).
 Includes API Key authentication for user tracking.
 """
 
