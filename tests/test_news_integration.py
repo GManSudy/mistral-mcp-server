@@ -20,7 +20,7 @@ async def test_news_tools_integration():
     print("=" * 70)
     
     try:
-        from src.server import mcp, get_client
+        from openproject_mcp.server import mcp, get_client
         print("\n✅ Server imports successful")
     except Exception as e:
         print(f"\n❌ Server import failed: {e}")
@@ -73,7 +73,7 @@ async def test_news_tools_integration():
         # Test 1: list_news (basic import)
         print("\n[1] Testing list_news import")
         try:
-            from src.tools.news import list_news
+            from openproject_mcp.tools.news import list_news
             print("✅ list_news imported successfully")
         except Exception as e:
             print(f"❌ Failed to import list_news: {e}")
@@ -82,7 +82,7 @@ async def test_news_tools_integration():
         # Test 2: create_news (basic import)
         print("\n[2] Testing create_news import")
         try:
-            from src.tools.news import create_news, CreateNewsInput
+            from openproject_mcp.tools.news import create_news, CreateNewsInput
             print("✅ create_news imported successfully")
         except Exception as e:
             print(f"❌ Failed to import create_news: {e}")
@@ -91,7 +91,7 @@ async def test_news_tools_integration():
         # Test 3: get_news (basic import)
         print("\n[3] Testing get_news import")
         try:
-            from src.tools.news import get_news
+            from openproject_mcp.tools.news import get_news
             print("✅ get_news imported successfully")
         except Exception as e:
             print(f"❌ Failed to import get_news: {e}")
@@ -100,7 +100,7 @@ async def test_news_tools_integration():
         # Test 4: update_news (basic import)
         print("\n[4] Testing update_news import")
         try:
-            from src.tools.news import update_news, UpdateNewsInput
+            from openproject_mcp.tools.news import update_news, UpdateNewsInput
             print("✅ update_news imported successfully")
         except Exception as e:
             print(f"❌ Failed to import update_news: {e}")
@@ -109,7 +109,7 @@ async def test_news_tools_integration():
         # Test 5: delete_news (basic import)
         print("\n[5] Testing delete_news import")
         try:
-            from src.tools.news import delete_news
+            from openproject_mcp.tools.news import delete_news
             print("✅ delete_news imported successfully")
         except Exception as e:
             print(f"❌ Failed to import delete_news: {e}")
@@ -118,7 +118,7 @@ async def test_news_tools_integration():
         # Test 6: Formatting functions
         print("\n[6] Testing formatting functions")
         try:
-            from src.utils.formatting import format_news_list, format_news_detail
+            from openproject_mcp.utils.formatting import format_news_list, format_news_detail
             
             # Test with sample data
             test_news = [{

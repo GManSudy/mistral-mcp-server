@@ -4,8 +4,8 @@ import json
 from typing import Optional
 from pydantic import BaseModel, Field
 
-from src.server import mcp, get_client
-from src.utils.formatting import (
+from openproject_mcp.server import mcp, get_client
+from openproject_mcp.utils.formatting import (
     format_work_package_list,
     format_work_package_detail,
     format_success,

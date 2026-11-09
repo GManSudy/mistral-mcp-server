@@ -9,7 +9,7 @@ import logging
 from dotenv import load_dotenv
 from fastmcp import FastMCP
 
-from src.client import OpenProjectClient
+from openproject_mcp.client import OpenProjectClient
 
 # Load environment variables
 load_dotenv()
@@ -65,19 +65,19 @@ logger.info("Loading tool modules...")
 
 try:
     # Phase 1: Priority tools (7 tools)
-    from src.tools import connection      # 2 tools: test_connection, check_permissions
-    from src.tools import work_packages   # 7 tools: list, create, update, delete, list_types, list_statuses, list_priorities
-    from src.tools import projects        # 5 tools: list, get, create, update, delete
+    from openproject_mcp.tools import connection      # 2 tools: test_connection, check_permissions
+    from openproject_mcp.tools import work_packages   # 7 tools: list, create, update, delete, list_types, list_statuses, list_priorities
+    from openproject_mcp.tools import projects        # 5 tools: list, get, create, update, delete
 
     # Phase 2: Additional tools (28 tools)
-    from src.tools import users           # 6 tools: list_users, get_user, list_roles, get_role, list_project_members, list_user_projects
-    from src.tools import memberships     # 5 tools: list, get, create, update, delete
-    from src.tools import hierarchy       # 3 tools: set_parent, remove_parent, list_children
-    from src.tools import relations       # 5 tools: create, list, get, update, delete
-    from src.tools import time_entries    # 5 tools: list, create, update, delete, list_activities
-    from src.tools import versions        # 2 tools: list, create
-    from src.tools import weekly_reports   # 4 tools: generate_weekly_report, get_report_data, generate_this_week_report, generate_last_week_report
-    from src.tools import news             # 5 tools: list_news, create_news, get_news, update_news, delete_news
+    from openproject_mcp.tools import users           # 6 tools: list_users, get_user, list_roles, get_role, list_project_members, list_user_projects
+    from openproject_mcp.tools import memberships     # 5 tools: list, get, create, update, delete
+    from openproject_mcp.tools import hierarchy       # 3 tools: set_parent, remove_parent, list_children
+    from openproject_mcp.tools import relations       # 5 tools: create, list, get, update, delete
+    from openproject_mcp.tools import time_entries    # 5 tools: list, create, update, delete, list_activities
+    from openproject_mcp.tools import versions        # 2 tools: list, create
+    from openproject_mcp.tools import weekly_reports   # 4 tools: generate_weekly_report, get_report_data, generate_this_week_report, generate_last_week_report
+    from openproject_mcp.tools import news             # 5 tools: list_news, create_news, get_news, update_news, delete_news
 
     logger.info("✅ All 49 tool modules loaded successfully")
 except ImportError as e:

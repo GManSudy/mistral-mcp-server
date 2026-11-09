@@ -51,7 +51,7 @@ uv sync                      # oder: pip install .
 ```
 - API-Key in OpenProject: Avatar → My account → Access tokens → + Add
 - Auth gegen OpenProject: `Authorization: Basic base64("apikey:" + KEY)`
-  (`src/client.py`). `Authorization: ApiKey <token>` wird von OpenProject **abgelehnt**.
+  (`openproject_mcp/client.py`). `Authorization: ApiKey <token>` wird von OpenProject **abgelehnt**.
 - HTTP-Modus (für Studio/Vibe Web): `uv run openproject-mcp-http.py`
   (Default `0.0.0.0:8000`, Endpunkt `POST /mcp`, streamable HTTP)
 - stdio-Modus (für lokale MCP-Clients wie Vibe VSCode / Claude Desktop):

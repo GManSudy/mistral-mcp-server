@@ -7,8 +7,8 @@ Includes API Key authentication for user tracking.
 """
 
 import os
-from src.server import mcp
-from src.auth import load_api_keys_from_env
+from openproject_mcp.server import mcp
+from openproject_mcp.auth import load_api_keys_from_env
 
 if __name__ == "__main__":
     # Load API keys for authentication

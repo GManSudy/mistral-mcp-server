@@ -176,7 +176,7 @@ def test_server_integration():
             content = f.read()
         
         # Check for news import
-        if "from src.tools import news" in content:
+        if "from openproject_mcp.tools import news" in content:
             print("  ✅ News import found in server.py")
         else:
             print("  ❌ News import missing in server.py")

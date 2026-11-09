@@ -1,8 +1,8 @@
 """Work package hierarchy management tools (parent-child relationships)."""
 
 from typing import Optional
-from src.server import mcp, get_client
-from src.utils.formatting import format_success, format_error, format_work_package_list
+from openproject_mcp.server import mcp, get_client
+from openproject_mcp.utils.formatting import format_success, format_error, format_work_package_list
 
 
 @mcp.tool

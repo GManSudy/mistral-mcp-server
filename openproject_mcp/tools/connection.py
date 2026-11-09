@@ -1,6 +1,6 @@
 """Connection and permission checking tools."""
 
-from src.server import mcp, get_client
+from openproject_mcp.server import mcp, get_client
 
 
 @mcp.tool

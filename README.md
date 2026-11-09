@@ -4,25 +4,28 @@ An **optimized fork of the OpenProject MCP server** (Python / FastMCP, OpenProje
 specialized for **Mistral** (Studio / Vibe Web & Vibe for VSCode) and **Claude**
 (Claude Code / Claude Desktop) agents.
 
-Original project: 👉 https://github.com/AndyEverything/openproject-mcp-server — see
-[Credits](#-credits).
+Original project: https://github.com/AndyEverything/openproject-mcp-server — see
+[Credits](#credits).
 
-> 🇩🇪 Detailed German guide: [`AGENT.md`](AGENT.md). Claude-specific docs:
-> [`CLAUDE_CODE_SETUP.md`](CLAUDE_CODE_SETUP.md) and [`CLAUDE_CODE_GUIDE.md`](CLAUDE_CODE_GUIDE.md).
+Detailed German guide: [`AGENT.md`](AGENT.md). Claude-specific docs:
+[`docs/CLAUDE_CODE_SETUP.md`](docs/CLAUDE_CODE_SETUP.md) and
+[`docs/CLAUDE_CODE_GUIDE.md`](docs/CLAUDE_CODE_GUIDE.md).
 
-## ✨ What's optimized in this fork
+## What's optimized in this fork
 
-- 🐳 **Fixed `Dockerfile`** — upstream `CMD` pointed to a non-existent `openproject-mcp.py`;
+- **Fixed `Dockerfile`** — upstream `CMD` pointed to a non-existent `openproject-mcp.py`;
   now starts `openproject-mcp-fastmcp.py` and exposes port 8000
-- 📦 **Complete `requirements.txt`** — upstream missed `fastmcp`, `pydantic`, `uvicorn`,
+- **Complete `requirements.txt`** — upstream missed `fastmcp`, `pydantic`, `uvicorn`,
   `starlette` (only installable via `pyproject.toml`)
-- 🧹 **Removed the 138 KB legacy monolith** (`openproject-mcp.legacy.py`) — dead code
-- 🏷️ **Packaging metadata** — real author, repo URLs (`Repository` / `Upstream`), version bump
-- 📖 **Step-by-step agent setup** (below) for Mistral Vibe and Claude Code
+- **Removed the 138 KB legacy monolith** (`openproject-mcp.legacy.py`) — dead code
+- **Cleaner structure** — package renamed `src` → `openproject_mcp`, tests in `tests/`,
+  guides in `docs/`
+- **Packaging metadata** — real author, repo URLs (`Repository` / `Upstream`), version bump
+- **Step-by-step agent setup** (below) for Mistral Vibe and Claude Code
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 - An **OpenProject instance** (cloud or self-hosted) and an **API key**
 - **Python 3.10+** and [uv](https://docs.astral.sh/uv/) (or plain pip)
@@ -32,13 +35,13 @@ Original project: 👉 https://github.com/AndyEverything/openproject-mcp-server 
 
 ---
 
-## 🚀 Step-by-Step Setup
+## Step-by-Step Setup
 
 ### Step 1 — Clone and set up this repository
 
 ```bash
 git clone https://github.com/GManSudy/openproject-mcp.git
-cd openproject-mcp-server
+cd openproject-mcp
 uv sync          # or: pip install -r requirements.txt
 ```
 
@@ -136,7 +139,7 @@ Back up and edit the Claude config
   "mcpServers": {
     "openproject": {
       "command": "uv",
-      "args": ["--directory", "/path/to/openproject-mcp-server", "run", "openproject-mcp-fastmcp.py"],
+      "args": ["--directory", "/path/to/openproject-mcp", "run", "openproject-mcp-fastmcp.py"],
       "env": {
         "OPENPROJECT_URL": "https://<your-openproject-instance>",
         "OPENPROJECT_API_KEY": "<token-from-access-tokens>"
@@ -146,9 +149,9 @@ Back up and edit the Claude config
 }
 ```
 
-Then **fully restart** Claude Code/Desktop and check the 🔌 MCP icon. Project-specific
-agents, slash commands and hooks live in [`.claude/`](.claude/) — see
-[`CLAUDE_CODE_GUIDE.md`](CLAUDE_CODE_GUIDE.md).
+Then **fully restart** Claude Code/Desktop and check the MCP icon in the status bar.
+Project-specific agents, slash commands and hooks live in [`.claude/`](.claude/) — see
+[`docs/CLAUDE_CODE_GUIDE.md`](docs/CLAUDE_CODE_GUIDE.md).
 
 ### Step 7 — Verify the integration (in this order)
 
@@ -160,7 +163,7 @@ agents, slash commands and hooks live in [`.claude/`](.claude/) — see
 
 ---
 
-## 🔒 Security (mandatory)
+## Security (mandatory)
 
 - Limit the OpenProject API key to **minimal rights** and rotate it regularly.
 - `.env`, `.mcp-bearer-token` and connector configs are gitignored — **never commit,
@@ -172,7 +175,7 @@ agents, slash commands and hooks live in [`.claude/`](.claude/) — see
 
 ---
 
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 | Symptom | Cause | Fix |
 |---|---|---|
@@ -185,22 +188,28 @@ agents, slash commands and hooks live in [`.claude/`](.claude/) — see
 
 ---
 
-## 📁 Repository layout
+## Repository layout
 
-| Path | Purpose |
-|---|---|
-| `src/` | MCP server implementation (client, auth, tools) |
-| `openproject-mcp-fastmcp.py` | stdio entry point (Vibe VSCode, Claude Code) |
-| `openproject-mcp-http.py` | streamable-HTTP entry point (Vibe Web/Studio) |
-| `openproject-mcp-sse.py` | SSE entry point |
-| `test_*.py` | tool tests |
-| `Dockerfile`, `pyproject.toml`, `requirements.txt` | packaging (fixed in this fork) |
-| `README.md` | this step-by-step guide |
-| `AGENT.md` | detailed Mistral (Studio / Vibe) integration guide (German) |
-| `CLAUDE_CODE_SETUP.md` / `CLAUDE_CODE_GUIDE.md` | Claude Code setup + workflows |
-| `.claude/` | Claude Code project config: agents, commands, hooks |
+```
+openproject-mcp/
+├── README.md                  this step-by-step guide
+├── AGENT.md                   detailed Mistral (Studio/Vibe) guide (German)
+├── pyproject.toml             packaging metadata (author, deps, URLs)
+├── requirements.txt           complete dependency list
+├── uv.lock                    lockfile
+├── Dockerfile                 fixed container build (CMD + EXPOSE 8000)
+├── env_example.txt            .env template
+├── openproject-mcp-fastmcp.py stdio entry point (Vibe VSCode, Claude Code)
+├── openproject-mcp-http.py    streamable-HTTP entry point (Vibe Web/Studio)
+├── openproject-mcp-sse.py     SSE entry point
+├── openproject_mcp/           the server package (client, auth, tools, utils)
+├── scripts/                   install helper (install_mcp.ps1)
+├── tests/                     tool tests (test_*.py)
+├── docs/                      guides: Claude Code setup/guide, weekly reports, etc.
+└── .claude/                   Claude Code project config (agents, commands, hooks)
+```
 
-## 🙏 Credits
+## Credits
 
 This project is an optimized fork of the original **openproject-mcp-server** by
 [**AndyEverything**](https://github.com/AndyEverything) — thank you for the original work

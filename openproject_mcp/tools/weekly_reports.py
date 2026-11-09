@@ -5,9 +5,9 @@ from typing import Optional
 from datetime import datetime, timedelta
 from pydantic import BaseModel, Field
 
-from src.server import mcp, get_client
-from src.utils.formatting import format_success, format_error
-from src.utils.report_formatter import (
+from openproject_mcp.server import mcp, get_client
+from openproject_mcp.utils.formatting import format_success, format_error
+from openproject_mcp.utils.report_formatter import (
     format_weekly_report_markdown,
     format_report_data_json,
 )

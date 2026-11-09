@@ -2,10 +2,10 @@
 
 import json
 from typing import Optional
-from src.server import mcp, get_client
+from openproject_mcp.server import mcp, get_client
 from pydantic import BaseModel, Field
-from src.utils.formatting import format_success, format_error
-from src.utils.formatting import format_project_list
+from openproject_mcp.utils.formatting import format_success, format_error
+from openproject_mcp.utils.formatting import format_project_list
 
 
 @mcp.tool

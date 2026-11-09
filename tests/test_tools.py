@@ -13,7 +13,7 @@ import os
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src.server import mcp, get_client
+from openproject_mcp.server import mcp, get_client
 
 
 async def test_all_tools():
@@ -39,7 +39,7 @@ async def test_all_tools():
     # Test 1: Connection Test
     print("\n[1] Test: test_connection")
     try:
-        from src.tools.connection import test_connection
+        from openproject_mcp.tools.connection import test_connection
         result = await test_connection()
         print(result[:200] + "..." if len(result) > 200 else result)
         print("OK PASSED")
@@ -49,7 +49,7 @@ async def test_all_tools():
     # Test 2: Check Permissions
     print("\n[2] Test: check_permissions")
     try:
-        from src.tools.connection import check_permissions
+        from openproject_mcp.tools.connection import check_permissions
         result = await check_permissions()
         print(result[:200] + "..." if len(result) > 200 else result)
         print("OK PASSED")
@@ -59,7 +59,7 @@ async def test_all_tools():
     # Test 3: List Projects
     print("\n[3] Test: list_projects")
     try:
-        from src.tools.projects import list_projects
+        from openproject_mcp.tools.projects import list_projects
         result = await list_projects(active_only=True)
         print(result[:300] + "..." if len(result) > 300 else result)
         print("OK PASSED")
@@ -69,7 +69,7 @@ async def test_all_tools():
     # Test 4: List Work Packages (CRITICAL)
     print("\n[4] Test: list_work_packages (CRITICAL)")
     try:
-        from src.tools.work_packages import list_work_packages
+        from openproject_mcp.tools.work_packages import list_work_packages
         result = await list_work_packages(active_only=True, page_size=5)
         print(result[:400] + "..." if len(result) > 400 else result)
         print("OK PASSED")
@@ -79,7 +79,7 @@ async def test_all_tools():
     # Test 5: Create Work Package (CRITICAL) - DRY RUN
     print("\n[5] Test: create_work_package validation (CRITICAL)")
     try:
-        from src.tools.work_packages import CreateWorkPackageInput
+        from openproject_mcp.tools.work_packages import CreateWorkPackageInput
         # Validate input model only (don't actually create)
         test_input = CreateWorkPackageInput(
             project_id=1,
@@ -95,7 +95,7 @@ async def test_all_tools():
     # Test 6: Update Work Package (CRITICAL) - DRY RUN
     print("\n[6] Test: update_work_package validation (CRITICAL)")
     try:
-        from src.tools.work_packages import UpdateWorkPackageInput
+        from openproject_mcp.tools.work_packages import UpdateWorkPackageInput
         # Validate input model only (don't actually update)
         test_input = UpdateWorkPackageInput(
             work_package_id=123,
@@ -111,7 +111,7 @@ async def test_all_tools():
     # Test 7: Response Formatting
     print("\n[7] Test: Response formatting utilities")
     try:
-        from src.utils.formatting import (
+        from openproject_mcp.utils.formatting import (
             format_project_list,
             format_work_package_list,
             format_success,

@@ -23,7 +23,7 @@ def test_pydantic_models():
     print("Test 1: Pydantic Model Validation")
     print("=" * 70)
     
-    from src.tools.news import CreateNewsInput, UpdateNewsInput
+    from openproject_mcp.tools.news import CreateNewsInput, UpdateNewsInput
     
     # Test 1.1: Valid CreateNewsInput
     print("\n[1.1] Testing CreateNewsInput - Valid")
@@ -122,7 +122,7 @@ def test_formatting_functions():
     print("Test 2: Formatting Functions")
     print("=" * 70)
     
-    from src.utils.formatting import format_news_list, format_news_detail
+    from openproject_mcp.utils.formatting import format_news_list, format_news_detail
     
     # Test 2.1: format_news_list with empty list
     print("\n[2.1] Testing format_news_list - Empty list")
@@ -251,7 +251,7 @@ async def test_tools_with_mocks():
     print("Test 3: Tool Functionality (Mocked)")
     print("=" * 70)
     
-    from src.tools.news import (
+    from openproject_mcp.tools.news import (
         list_news,
         create_news,
         get_news,

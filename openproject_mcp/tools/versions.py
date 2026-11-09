@@ -2,8 +2,8 @@
 
 from typing import Optional
 from pydantic import BaseModel, Field
-from src.server import mcp, get_client
-from src.utils.formatting import format_success, format_error
+from openproject_mcp.server import mcp, get_client
+from openproject_mcp.utils.formatting import format_success, format_error
 
 
 class CreateVersionInput(BaseModel):
