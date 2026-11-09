@@ -19,7 +19,7 @@ classifiers = [
 ]
 
 [project.urls]
-Repository = "https://github.com/GManSudy/openproject-mcp"
+Repository = "https://github.com/GManSudy/mistral-mcp-server"
 Upstream = "https://github.com/AndyEverything/openproject-mcp-server"
 
 dependencies = [

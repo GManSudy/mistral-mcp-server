@@ -40,7 +40,7 @@ Detailed German guide: [`AGENT.md`](AGENT.md). Claude-specific docs:
 ### Step 1 — Clone and set up this repository
 
 ```bash
-git clone https://github.com/GManSudy/openproject-mcp.git
+git clone https://github.com/GManSudy/mistral-mcp-server.git
 cd openproject-mcp
 uv sync          # or: pip install -r requirements.txt
 ```
