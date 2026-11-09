@@ -8,14 +8,12 @@ Transports:
 Credentials via environment: TRELLO_API_KEY, TRELLO_TOKEN.
 """
 
-import argparse
 import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "worker", "src"))
 
-from fastmcp import FastMCP
-
+from common import create_server, load_env, run_server
 from worker.workflows.trello_client import (
     TrelloError,
     trello_get,
@@ -23,7 +21,9 @@ from worker.workflows.trello_client import (
     trello_put,
 )
 
-mcp = FastMCP("trello")
+load_env()
+
+mcp = create_server("trello")
 
 
 async def _resolve_board_id(board: str) -> str:
@@ -118,12 +118,4 @@ async def archive_card(board: str, card: str) -> dict:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Trello MCP server")
-    parser.add_argument("--http", action="store_true", help="HTTP transport instead of stdio")
-    parser.add_argument("--host", default="0.0.0.0")
-    parser.add_argument("--port", type=int, default=8000)
-    args = parser.parse_args()
-    if args.http:
-        mcp.run(transport="http", host=args.host, port=args.port)
-    else:
-        mcp.run()
+    run_server(mcp, "Trello MCP server")

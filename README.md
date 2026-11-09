@@ -178,8 +178,10 @@ mistral-mcp-server/
 ├── openproject-mcp-sse.py     OpenProject SSE entry point
 ├── openproject_mcp/           OpenProject server package (client, auth, tools, utils)
 ├── apps/mcp/
+│   ├── common.py              shared boilerplate: .env loading, CLI (--http/--port), server factory
+│   ├── server_template.py     copy this for a new server
 │   ├── trello_mcp.py          Trello MCP server (stdio + --http)
-│   └── mcp.example.json       Vibe VSCode config example
+│   └── mcp.example.json       Vibe VSCode config example (all servers)
 ├── apps/worker/src/worker/    shared Trello API client (trello_client.py)
 ├── tests/                     OpenProject tool tests (test_*.py)
 └── docs/                      guides (e.g. news tools)
@@ -187,11 +189,16 @@ mistral-mcp-server/
 
 ## Adding another MCP server
 
-1. Put the entry point in the repo (e.g. `apps/<name>/`) and reuse `requirements.txt`.
-2. Read its credentials from `.env` (add a section to `env_example.txt`).
-3. No Docker changes needed: run it with
-   `MCP_ENTRYPOINT=apps/<name>/<server>.py` (+ `MCP_ARGS`), or add a service to
+All servers live in `apps/mcp/` and share the same boilerplate (`apps/mcp/common.py`):
+unified `.env` loading, one CLI (`stdio` by default, `--http [--host] [--port]`).
+
+1. `cp apps/mcp/server_template.py apps/mcp/<name>_mcp.py` and fill in your tools.
+2. Read credentials from the unified `.env` (add a section to `env_example.txt`).
+3. Run: `python apps/mcp/<name>_mcp.py [--http]`.
+4. Deploy: no Docker changes needed — `MCP_ENTRYPOINT=apps/mcp/<name>_mcp.py`
+   (+ `MCP_ARGS="--http --port 8000"`), or add a service to
    `deploy/docker/docker-compose.yml`.
+5. Add an entry to `apps/mcp/mcp.example.json` for Vibe VSCode.
 
 ## Credits
 

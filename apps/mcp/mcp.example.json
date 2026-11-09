@@ -1,5 +1,13 @@
 {
   "servers": {
+    "openproject": {
+      "command": "uv",
+      "args": ["run", "openproject-mcp-fastmcp.py"],
+      "env": {
+        "OPENPROJECT_URL": "https://<your-openproject-instance>",
+        "OPENPROJECT_API_KEY": "<token-from-access-tokens>"
+      }
+    },
     "trello": {
       "command": "python",
       "args": ["apps/mcp/trello_mcp.py"],
