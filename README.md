@@ -11,9 +11,6 @@ Currently included:
 | **OpenProject** | `openproject-mcp-*.py` | OpenProject API v3: projects, work packages, news, time entries, weekly reports |
 | **Trello** | `apps/mcp/trello_mcp.py` | Boards/lists/cards by exact name: list, summarize, create, move, archive |
 
-The OpenProject server is an optimized fork of
-https://github.com/AndyEverything/openproject-mcp-server — see [Credits](#credits).
-
 Detailed German guide for OpenProject + Mistral: [`AGENT.md`](AGENT.md).
 
 ---
